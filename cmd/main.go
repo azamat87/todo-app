@@ -5,29 +5,36 @@ import (
 	"golang_ninja/todo-app/pkg/handler"
 	"golang_ninja/todo-app/pkg/repository"
 	"golang_ninja/todo-app/pkg/service"
-	"log"
+	"os"
 
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
+	"github.com/subosito/gotenv"
 
 	"github.com/spf13/viper"
 )
 
 func main() {
+	logrus.SetFormatter(new(logrus.JSONFormatter))
 	if err := initConfig(); err != nil {
-		log.Fatalf("error error instal configs: %s", err.Error())
+		logrus.Fatalf("error error instal configs: %s", err.Error())
+	}
+
+	if err := gotenv.Load(); err != nil {
+		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
 
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
-		Password: viper.GetString("db.password"),
+		Password: os.Getenv("DB_PASSWORD"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
 	})
 
 	if err != nil {
-		log.Fatalf("failed init db: %s", err.Error())
+		logrus.Fatalf("failed init db: %s", err.Error())
 	}
 
 	repos := repository.NewRepository(db)
@@ -36,11 +43,8 @@ func main() {
 
 	srv := new(todoapp.Server)
 
-	if err := srv.Run(
-		viper.GetString("port"),
-		handlers.InitRoutes(),
-	); err != nil {
-		log.Fatalf("error runing http server: %s", err.Error())
+	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		logrus.Fatalf("error runing http server: %s", err.Error())
 	}
 
 }

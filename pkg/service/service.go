@@ -1,8 +1,14 @@
 package service
 
-import "golang_ninja/todo-app/pkg/repository"
+import (
+	todoapp "golang_ninja/todo-app"
+	"golang_ninja/todo-app/pkg/repository"
+)
 
-type Authorizatiopn interface {
+type Authorization interface {
+	CreateUser(user todoapp.User) (int, error)
+	GenerateToken(username string, password string) (string, error)
+	ParseToken(accessToken string) (int, error)
 }
 
 type TodoList interface {
@@ -12,11 +18,13 @@ type TodoItem interface {
 }
 
 type Service struct {
-	Authorizatiopn
+	Authorization
 	TodoList
 	TodoItem
 }
 
 func NewService(repos *repository.Repository) *Service {
-	return &Service{}
+	return &Service{
+		Authorization: NewAuthService(repos.Authorizatiopn),
+	}
 }
