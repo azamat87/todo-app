@@ -3,7 +3,12 @@ package handler
 import (
 	"golang_ninja/todo-app/pkg/service"
 
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/gin-gonic/gin"
+
+	_ "golang_ninja/todo-app/docs"
 )
 
 type Handler struct {
@@ -18,6 +23,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
 	router.GET("/", h.home)
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	auth := router.Group("/auth")
 	{
@@ -42,7 +49,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			}
 		}
 
-		items := api.Group("/items")
+		items := api.Group("items")
 		{
 			items.GET("/:id", h.getItemById)
 			items.PUT("/:id", h.updateItem)
