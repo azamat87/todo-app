@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	todoapp "golang_ninja/todo-app"
 	"net/http"
 
@@ -23,7 +24,7 @@ func (h *Handler) signUp(c *gin.Context) {
 	var input todoapp.User
 
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, http.StatusBadRequest, errors.New("invalid input body").Error())
 		return
 	}
 

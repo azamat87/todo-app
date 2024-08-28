@@ -5,6 +5,8 @@ import (
 	"golang_ninja/todo-app/pkg/repository"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type Authorization interface {
 	CreateUser(user todoapp.User) (int, error)
 	GenerateToken(username string, password string) (string, error)
